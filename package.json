@@ -1,6 +1,13 @@
 {
   "name": "edu-api",
   "version": "1.0.0",
+  "description": "Public read-only API serving education lesson listings for sceneitnow.org",
   "type": "module",
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "netlify dev"
+  }
 }

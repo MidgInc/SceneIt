@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>SceneIt: Civilian Digital Witness</title>
+<meta name="description" content="SceneIt: cryptographically verified, forensic-grade evidence documentation for civilians. Coming soon." />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self';" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root, :root[data-theme="dark"] {
+    --bg-deep: #0a1310;
+    --bg-mid: #101d17;
+    --panel: rgba(35, 58, 48, 0.38);
+    --panel-solid: #16241d;
+    --panel-hover: rgba(35, 58, 48, 0.55);
+    --border: rgba(143, 174, 158, 0.18);
+    --border-bright: rgba(143, 174, 158, 0.4);
+    --sage: #8fae9e;
+    --sage-bright: #b7d4c3;
+    --text-head: #e8ede9;
+    --text-body: #a8bab0;
+    --text-mute: #5f7669;
+    --red: #d96b5c;
+    --radius: 12px;
+    --shadow: rgba(0,0,0,0.3);
+    --shadow-soft: rgba(0,0,0,0.25);
+    --font-display: 'Archivo', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  :root[data-theme="light"] {
+    --bg-deep: #f5faf7;
+    --bg-mid: #eaf4ee;
+    --panel: rgba(35, 58, 48, 0.06);
+    --panel-solid: #dcece2;
+    --panel-hover: rgba(35, 58, 48, 0.1);
+    --border: rgba(59, 92, 74, 0.16);
+    --border-bright: rgba(46, 79, 62, 0.38);
+    --sage: #3f6353;
+    --sage-bright: #2c4c3c;
+    --text-head: #12201a;
+    --text-body: #445248;
+    --text-mute: #8fa093;
+    --red: #b8442f;
+    --shadow: rgba(30,50,40,0.12);
+    --shadow-soft: rgba(30,50,40,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body {
+    background:
+      radial-gradient(1000px 560px at 12% -8%, rgba(143,174,158,0.10), transparent 60%),
+      radial-gradient(800px 480px at 105% 8%, rgba(74,107,88,0.14), transparent 55%),
+      linear-gradient(170deg, var(--bg-deep), var(--bg-mid));
+    background-attachment: fixed;
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.6;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.5;
+    mix-blend-mode: normal;
+  }
+
+  :root[data-theme="light"] body::before {
+    mix-blend-mode: multiply;
+    opacity: 0.3;
+  }
+
+  a { color: var(--sage-bright); text-decoration: none; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    background: color-mix(in srgb, var(--bg-deep) 75%, transparent);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-family: var(--font-display); font-weight: 900;
+    letter-spacing: 0.01em; font-size: 1.1rem; color: var(--text-head);
+  }
+  .brand em { font-style: normal; color: var(--sage-bright); }
+  .nav-links { display: flex; gap: 26px; align-items: center; }
+  .nav-links a {
+    color: var(--text-mute); font-size: 0.85rem; font-family: var(--font-mono);
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--sage-bright); }
+  .chip {
+    padding: 7px 16px; border-radius: 999px;
+    border: 1px solid var(--border-bright);
+    background: var(--panel); color: var(--sage-bright) !important;
+    font-size: 0.8rem;
+  }
+  .chip:hover { background: var(--panel-hover); }
+
+  .theme-toggle {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1px solid var(--border-bright); background: var(--panel);
+    color: var(--sage-bright); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { background: var(--panel-hover); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+  .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 28px; }
+  section { padding: 96px 0; }
+  .section-eyebrow {
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--sage);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--sage); display: inline-block; }
+  .section-title {
+    font-family: var(--font-display); font-weight: 800; font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    color: var(--text-head); margin-bottom: 12px; letter-spacing: -0.01em;
+  }
+  .section-sub { color: var(--text-body); margin-bottom: 32px; font-size: 0.92rem; max-width: 60ch; }
+
+  .hero { padding: 120px 0 80px; }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.05;
+    color: var(--text-head); margin-bottom: 22px; letter-spacing: -0.01em;
+  }
+  .hero h1 em { font-style: normal; color: var(--sage-bright); }
+  .hero p {
+    color: var(--text-body); max-width: 54ch; margin-bottom: 32px; font-size: 0.98rem;
+  }
+  .btn-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    padding: 13px 26px; border-radius: 8px; font-size: 0.92rem;
+    font-weight: 500; cursor: pointer; border: 1px solid transparent;
+    transition: transform .15s, background .2s, box-shadow .2s;
+    font-family: var(--font-body);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--sage-bright); color: #0a1310; font-weight: 700;
+    box-shadow: 0 6px 24px rgba(143,174,158,0.2);
+  }
+  .btn-primary:hover { background: #cfe6da; }
+  .btn-ghost {
+    background: var(--panel); color: var(--sage-bright);
+    border-color: var(--border-bright); backdrop-filter: blur(10px);
+  }
+  .btn-ghost:hover { background: var(--panel-hover); }
+  .btn:focus-visible, a:focus-visible, .card:focus-visible {
+    outline: 2px solid var(--sage-bright); outline-offset: 3px;
+  }
+
+  .panel {
+    background: var(--panel);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: 0 10px 30px var(--shadow);
+  }
+
+  .capture-demo { display: grid; gap: 22px; }
+  .capture-frame {
+    aspect-ratio: 16/9; border-radius: 8px;
+    background:
+      repeating-linear-gradient(45deg, rgba(143,174,158,0.04) 0 2px, transparent 2px 12px),
+      linear-gradient(135deg, #0d1712, #1a2b22);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .capture-frame .reticle {
+    width: 46%; height: 62%; border: 1.5px dashed var(--border-bright);
+    border-radius: 4px; position: relative;
+  }
+  .capture-frame .reticle::before, .capture-frame .reticle::after {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    border-color: var(--sage-bright); border-style: solid; border-width: 0;
+  }
+  .capture-frame .reticle::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .capture-frame .reticle::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+  .capture-frame .flash {
+    position: absolute; inset: 0; background: var(--sage-bright);
+    opacity: 0; pointer-events: none;
+  }
+  .capture-frame.flashing .flash { animation: flashPop 0.4s ease; }
+  @keyframes flashPop { 0% { opacity: 0.85; } 100% { opacity: 0; } }
+
+  .capture-log {
+    font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.9;
+    color: var(--text-mute); min-height: 168px;
+  }
+  .capture-log .line { display: block; opacity: 0; transform: translateX(-6px); }
+  .capture-log .line.show { animation: logIn 0.35s ease forwards; }
+  @keyframes logIn { to { opacity: 1; transform: translateX(0); } }
+  .capture-log .ok { color: var(--sage-bright); }
+  .capture-log .hash-val { color: var(--text-head); word-break: break-all; }
+
+  .capture-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .capture-status {
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-mute);
+  }
+
+  .forensic-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .fcard {
+    background: var(--panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; box-shadow: 0 10px 30px var(--shadow-soft);
+  }
+  .fcard h3 {
+    font-family: var(--font-display); font-weight: 700; font-size: 1.02rem;
+    color: var(--text-head); margin-bottom: 6px;
+  }
+  .fcard > p { color: var(--text-mute); font-size: 0.86rem; margin-bottom: 16px; }
+
+  .meta-rows { font-family: var(--font-mono); font-size: 0.78rem; }
+  .meta-row {
+    display: flex; justify-content: space-between; padding: 7px 0;
+    border-bottom: 1px solid var(--border); color: var(--text-mute);
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row .v { color: var(--text-body); opacity: 0; transition: opacity .3s; }
+  .meta-row .v.revealed { opacity: 1; color: var(--sage-bright); }
+  .meta-btn {
+    margin-top: 14px; width: 100%; padding: 10px; border-radius: 6px;
+    background: transparent; border: 1px solid var(--border-bright);
+    color: var(--sage-bright); font-family: var(--font-mono); font-size: 0.76rem;
+    cursor: pointer; transition: background .2s;
+  }
+  .meta-btn:hover { background: var(--panel-hover); }
+
+  .tamper-toggle {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .tamper-toggle button {
+    flex: 1; padding: 9px; border-radius: 6px; border: 1px solid var(--border-bright);
+    background: transparent; color: var(--text-mute); font-family: var(--font-mono);
+    font-size: 0.74rem; cursor: pointer; transition: all .2s;
+  }
+  .tamper-toggle button.active { background: var(--panel-hover); color: var(--sage-bright); border-color: var(--sage-bright); }
+  .tamper-result {
+    font-family: var(--font-mono); font-size: 0.78rem; padding: 12px;
+    border-radius: 6px; border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; transition: all .3s;
+  }
+  .tamper-result .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tamper-result.match { color: var(--sage-bright); border-color: rgba(143,174,158,0.35); }
+  .tamper-result.match .dot { background: var(--sage-bright); }
+  .tamper-result.mismatch { color: var(--red); border-color: rgba(217,107,92,0.35); }
+  .tamper-result.mismatch .dot { background: var(--red); animation: pulseDot 1s ease-in-out infinite; }
+  @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .chain { display: flex; flex-direction: column; gap: 0; }
+  .chain-node {
+    display: flex; gap: 14px; align-items: flex-start; position: relative; padding-bottom: 20px;
+  }
+  .chain-node:last-child { padding-bottom: 0; }
+  .chain-node::before {
+    content: ''; position: absolute; left: 5px; top: 20px; bottom: 0; width: 1px;
+    background: var(--border);
+  }
+  .chain-node:last-child::before { display: none; }
+  .chain-dot {
+    width: 11px; height: 11px; border-radius: 50%; margin-top: 3px; flex-shrink: 0;
+    border: 1.5px solid var(--border-bright); background: var(--bg-deep); transition: all .4s;
+  }
+  .chain-node.lit .chain-dot { background: var(--sage-bright); border-color: var(--sage-bright); box-shadow: 0 0 10px rgba(183,212,195,0.5); }
+  .chain-text b { display: block; font-size: 0.86rem; color: var(--text-mute); transition: color .4s; }
+  .chain-node.lit .chain-text b { color: var(--text-head); }
+  .chain-text span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-mute); }
+  .chain-run-btn {
+    margin-top: 16px; padding: 10px 18px; border-radius: 6px;
+    background: transparent; border: 1px solid var(--border-bright);
+    color: var(--sage-bright); font-family: var(--font-mono); font-size: 0.76rem; cursor: pointer;
+  }
+  .chain-run-btn:hover { background: var(--panel-hover); }
+
+  .lesson-list { list-style: none; margin-top: 18px; display: grid; gap: 10px; }
+  .lesson-list li {
+    padding: 15px 18px; border: 1px solid var(--border); border-radius: 9px;
+    background: rgba(143,174,158,0.03);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.9rem; color: var(--text-body);
+  }
+  .lesson-list li span { color: var(--text-mute); font-size: 0.78rem; font-family: var(--font-mono); }
+  .placeholder { color: var(--text-mute); font-style: italic; font-size: 0.85rem; }
+
+  .access-strip {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 80;
+    background: linear-gradient(90deg, #16241d, #233a30);
+    border-top: 1px solid var(--border-bright);
+    backdrop-filter: blur(16px);
+    padding: calc(12px + env(safe-area-inset-bottom, 0px)) 20px 12px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    flex-wrap: wrap; text-align: center;
+  }
+  .access-strip span { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-body); }
+  .access-strip input {
+    background: color-mix(in srgb, var(--bg-deep) 60%, transparent); border: 1px solid var(--border-bright);
+    color: var(--text-head); font-family: var(--font-mono); font-size: 0.82rem;
+    padding: 8px 12px; border-radius: 6px; outline: none; width: 200px;
+  }
+  .access-strip button {
+    padding: 8px 16px; border-radius: 6px; border: none;
+    background: var(--sage-bright); color: #0a1310; font-weight: 700;
+    font-size: 0.82rem; cursor: pointer;
+  }
+
+  #toast-box {
+    position: fixed; top: 80px; right: 18px; z-index: 200;
+    display: flex; flex-direction: column; gap: 10px; max-width: calc(100vw - 36px);
+  }
+  .toast {
+    background: color-mix(in srgb, var(--panel-solid) 95%, transparent);
+    border: 1px solid var(--border-bright); border-left: 3px solid var(--sage-bright);
+    color: var(--text-head); padding: 13px 18px; border-radius: 9px;
+    font-size: 0.86rem; max-width: 300px; box-shadow: 0 10px 30px var(--shadow);
+    animation: slideIn .25s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 24px 120px; text-align: center;
+    color: var(--text-mute); font-size: 0.84rem; font-family: var(--font-mono);
+  }
+
+  .reveal { opacity: 0; transform: translateY(18px); }
+  .reveal.in { animation: revealIn 0.6s ease forwards; }
+  @keyframes revealIn { to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 700px) {
+    .nav-links a:not(.chip) { display: none; }
+    section { padding: 64px 0; }
+    .access-strip input { width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">Scene<em>It</em></div>
+  <div class="nav-links">
+    <a href="#capture">Capture</a>
+    <a href="#forensics">Forensics</a>
+    <a href="#education">Education</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#" class="chip" id="nav-get-app">Get Early Access</a>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <p class="section-eyebrow">Civilian Digital Witness Platform</p>
+  <h1>You witnessed it.<br><em>Now prove it.</em></h1>
+  <p>
+    SceneIt is a cryptographically verified, forensic-grade evidence documentation
+    tool for ordinary people, capturing, sealing, and transmitting tamper-evident
+    records that hold up in court. No forensic training required. No identity exposed.
+  </p>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="hero-try">Try the capture demo</button>
+    <button class="btn btn-ghost" id="hero-get-app">Get the app</button>
+  </div>
+</header>
+
+<section class="wrap" id="capture">
+  <p class="section-eyebrow reveal">Live Demo</p>
+  <h2 class="section-title reveal">Capture → Hash → Seal</h2>
+  <p class="section-sub reveal">
+    This runs a real SHA-256 digest in your browser, the same primitive SceneIt
+    uses to seal evidence the moment it's captured.
+  </p>
+  <div class="panel capture-demo reveal">
+    <div class="capture-frame" id="captureFrame">
+      <div class="reticle"></div>
+      <div class="flash"></div>
+    </div>
+    <div class="capture-actions">
+      <button class="btn btn-primary" id="captureBtn">Capture evidence</button>
+      <span class="capture-status" id="captureStatus">Awaiting capture</span>
+    </div>
+    <div class="capture-log" id="captureLog"></div>
+  </div>
+</section>
+
+<section class="wrap" id="forensics">
+  <p class="section-eyebrow reveal">Beyond Hashing</p>
+  <h2 class="section-title reveal">A forensic toolkit, not a single trick</h2>
+  <p class="section-sub reveal">
+    Hashing is one layer. SceneIt also captures metadata, detects tampering,
+    and maintains a verifiable chain of custody from capture to court.
+  </p>
+  <div class="forensic-grid">
+
+    <div class="fcard reveal">
+      <h3>Metadata capture</h3>
+      <p>Every frame embeds forensic context automatically.</p>
+      <div class="meta-rows" id="metaRows">
+        <div class="meta-row"><span>device_id</span><span class="v" data-val="PX-7A2F-991C">·</span></div>
+        <div class="meta-row"><span>gps_lat</span><span class="v" data-val="40.7128° N">·</span></div>
+        <div class="meta-row"><span>gps_lng</span><span class="v" data-val="74.0060° W">·</span></div>
+        <div class="meta-row"><span>utc_time</span><span class="v" data-val="">·</span></div>
+        <div class="meta-row"><span>integrity</span><span class="v" data-val="unaltered">·</span></div>
+      </div>
+      <button class="meta-btn" id="metaBtn">Reveal captured metadata</button>
+    </div>
+
+    <div class="fcard reveal">
+      <h3>Tamper detection</h3>
+      <p>Compare a file's live hash against its sealed original.</p>
+      <div class="tamper-toggle">
+        <button class="active" id="tamperOriginal">Original file</button>
+        <button id="tamperEdited">Edited file</button>
+      </div>
+      <div class="tamper-result match" id="tamperResult">
+        <div class="dot"></div>
+        <span id="tamperText">Hash matches sealed record: unaltered</span>
+      </div>
+    </div>
+
+    <div class="fcard reveal">
+      <h3>Chain of custody</h3>
+      <p>Every handoff is logged, timestamped, and sealed.</p>
+      <div class="chain" id="chainList">
+        <div class="chain-node" data-label="Captured on device" data-time="t+0.0s">
+          <div class="chain-dot"></div>
+          <div class="chain-text"><b>Captured on device</b><span>t+0.0s</span></div>
+        </div>
+        <div class="chain-node" data-label="Hash sealed" data-time="t+0.4s">
+          <div class="chain-dot"></div>
+          <div class="chain-text"><b>Hash sealed</b><span>t+0.4s</span></div>
+        </div>
+        <div class="chain-node" data-label="Witness identity anchored (encrypted)" data-time="t+0.9s">
+          <div class="chain-dot"></div>
+          <div class="chain-text"><b>Witness identity anchored (encrypted)</b><span>t+0.9s</span></div>
+        </div>
+        <div class="chain-node" data-label="Transmitted to secure vault" data-time="t+1.6s">
+          <div class="chain-dot"></div>
+          <div class="chain-text"><b>Transmitted to secure vault</b><span>t+1.6s</span></div>
+        </div>
+        <div class="chain-node" data-label="Ready for export / court record" data-time="t+2.1s">
+          <div class="chain-dot"></div>
+          <div class="chain-text"><b>Ready for export / court record</b><span>t+2.1s</span></div>
+        </div>
+      </div>
+      <button class="chain-run-btn" id="chainBtn">Run custody sequence</button>
+    </div>
+
+  </div>
+</section>
+
+<section class="wrap" id="education">
+  <p class="section-eyebrow reveal">Education</p>
+  <h2 class="section-title reveal">Learn the fundamentals</h2>
+  <p class="section-sub reveal">Short lessons on documenting evidence safely and legally.</p>
+  <div class="panel reveal">
+    <button class="btn btn-primary" id="load-lessons">Load lessons</button>
+    <ul class="lesson-list" id="lesson-list">
+      <li class="placeholder">No lessons loaded yet, click above.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="wrap" id="privacy">
+  <p class="section-eyebrow reveal">Security & Privacy</p>
+  <h2 class="section-title reveal">Your identity stays yours</h2>
+  <p class="section-sub reveal">
+    SceneIt uses a zero-knowledge architecture: we can verify your evidence
+    is authentic and unaltered without ever knowing who you are.
+  </p>
+  <div class="panel reveal">
+    <p>
+      We collect only what's cryptographically necessary. Sensitive actions,
+      account recovery, identity verification, legal export, are handled
+      exclusively in the mobile app, with end-to-end protections.
+    </p>
+    <p class="placeholder" style="margin-top:12px;">Full privacy policy coming soon.</p>
+    <button class="btn btn-ghost" style="margin-top:18px;" id="privacy-app-prompt">Try a sensitive action</button>
+  </div>
+</section>
+
+<section class="wrap" id="contact">
+  <p class="section-eyebrow reveal">Connect</p>
+  <h2 class="section-title reveal">Follow along or reach out</h2>
+  <div class="panel reveal">
+    <div style="display:flex; gap:14px; flex-wrap:wrap;">
+      <a href="https://instagram.com/scene_itapp" target="_blank" rel="noopener noreferrer" class="chip">Instagram</a>
+      <a href="https://x.com/sceneitapp" target="_blank" rel="noopener noreferrer" class="chip">X / Twitter</a>
+      <a href="mailto:hello@sceneitnow.org" class="chip">Email</a>
+    </div>
+  </div>
+</section>
+
+<div class="access-strip">
+  <span>Get early access:</span>
+  <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="off" spellcheck="false" />
+  <button id="notifyBtn">Notify me</button>
+</div>
+
+<footer>© 2026 SceneIt, sceneitnow.org</footer>
+
+<div id="toast-box"></div>
+
+<script>
+
+  (function () {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const stored = localStorage.getItem('sceneit-theme');
+    const systemLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    const initial = stored || (systemLight ? 'light' : 'dark');
+    root.setAttribute('data-theme', initial);
+    btn.setAttribute('aria-pressed', String(initial === 'light'));
+    btn.setAttribute('aria-label', initial === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('sceneit-theme', next);
+      btn.setAttribute('aria-pressed', String(next === 'light'));
+      btn.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+    });
+  })();
+
+  function showToast(message) {
+    const box = document.getElementById("toast-box");
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = message;
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+
+  ["nav-get-app", "hero-get-app"].forEach(id => {
+    document.getElementById(id).addEventListener("click", e => {
+      e.preventDefault();
+      showToast("Coming soon, join the waitlist below.");
+      document.querySelector('.access-strip input').focus();
+    });
+  });
+  document.getElementById("privacy-app-prompt").addEventListener("click", () => {
+    showToast("For sensitive actions, please use the app.");
+  });
+  document.getElementById("hero-try").addEventListener("click", () => {
+    document.getElementById("capture").scrollIntoView({ behavior: "smooth" });
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.animationDelay = (i % 4) * 0.06 + 's';
+    io.observe(el);
+  });
+
+  const captureBtn = document.getElementById('captureBtn');
+  const captureFrame = document.getElementById('captureFrame');
+  const captureLog = document.getElementById('captureLog');
+  const captureStatus = document.getElementById('captureStatus');
+
+  function logLine(text, cls) {
+    return new Promise(resolve => {
+      const span = document.createElement('span');
+      span.className = 'line' + (cls ? ' ' + cls : '');
+      span.textContent = text;
+      captureLog.appendChild(span);
+      requestAnimationFrame(() => span.classList.add('show'));
+      setTimeout(resolve, 220);
+    });
+  }
+
+  async function sha256Hex(str) {
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  let capturing = false;
+  captureBtn.addEventListener('click', async () => {
+    if (capturing) return;
+    capturing = true;
+    captureBtn.disabled = true;
+    captureLog.innerHTML = '';
+    captureStatus.textContent = 'Capturing...';
+    captureFrame.classList.add('flashing');
+    setTimeout(() => captureFrame.classList.remove('flashing'), 400);
+
+    const seed = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+    const now = new Date();
+    const iso = now.toISOString();
+    const payload = `frame:${seed}|t:${iso}|geo:40.7128,-74.0060`;
+
+    await logLine('$ init capture session', 'dim');
+    await logLine('✓ frame acquired', 'ok');
+    await logLine('✓ gps + utc bound to frame', 'ok');
+    await logLine('computing sha-256 digest...', '');
+    const hash = await sha256Hex(payload);
+    await logLine('hash: ' + hash, 'hash-val');
+    await logLine('✓ digest sealed: immutable', 'ok');
+    await logLine('$ ' , 'dim');
+
+    captureStatus.textContent = 'Sealed at ' + iso.split('T')[1].split('.')[0] + ' UTC';
+    captureBtn.disabled = false;
+    capturing = false;
+  });
+
+  document.getElementById('metaBtn').addEventListener('click', function () {
+    const rows = document.querySelectorAll('#metaRows .v');
+    const nowRow = document.querySelector('#metaRows .meta-row:nth-child(4) .v');
+    nowRow.dataset.val = new Date().toISOString().split('T')[1].split('.')[0] + ' UTC';
+    rows.forEach((el, i) => {
+      setTimeout(() => {
+        el.textContent = el.dataset.val;
+        el.classList.add('revealed');
+      }, i * 140);
+    });
+    this.textContent = 'Metadata captured ✓';
+    this.disabled = true;
+  });
+
+  const tamperOriginal = document.getElementById('tamperOriginal');
+  const tamperEdited = document.getElementById('tamperEdited');
+  const tamperResult = document.getElementById('tamperResult');
+  const tamperText = document.getElementById('tamperText');
+
+  function setTamper(isOriginal) {
+    tamperOriginal.classList.toggle('active', isOriginal);
+    tamperEdited.classList.toggle('active', !isOriginal);
+    if (isOriginal) {
+      tamperResult.className = 'tamper-result match';
+      tamperText.textContent = 'Hash matches sealed record: unaltered';
+    } else {
+      tamperResult.className = 'tamper-result mismatch';
+      tamperText.textContent = 'Hash mismatch detected: file modified since capture';
+    }
+  }
+  tamperOriginal.addEventListener('click', () => setTamper(true));
+  tamperEdited.addEventListener('click', () => setTamper(false));
+
+  document.getElementById('chainBtn').addEventListener('click', function () {
+    this.disabled = true;
+    const nodes = document.querySelectorAll('#chainList .chain-node');
+    nodes.forEach(n => n.classList.remove('lit'));
+    nodes.forEach((n, i) => {
+      setTimeout(() => { n.classList.add('lit'); }, i * 450);
+    });
+    setTimeout(() => { this.disabled = false; }, nodes.length * 450 + 200);
+  });
+
+  document.getElementById('load-lessons').addEventListener('click', async function () {
+    const listEl = document.getElementById('lesson-list');
+    const btn = this;
+    listEl.innerHTML = '';
+    btn.disabled = true;
+    const loading = document.createElement('li');
+    loading.className = 'placeholder';
+    loading.textContent = 'Loading...';
+    listEl.appendChild(loading);
+
+    try {
+      const res = await fetch('/api/lessons');
+      if (!res.ok) throw new Error('request failed');
+      const lessons = await res.json();
+      listEl.innerHTML = '';
+      if (!Array.isArray(lessons) || lessons.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'placeholder';
+        empty.textContent = 'No lessons available.';
+        listEl.appendChild(empty);
+      } else {
+        lessons.forEach(lesson => {
+          const li = document.createElement('li');
+          const title = document.createElement('span');
+          title.textContent = String(lesson.title);
+          const id = document.createElement('span');
+          id.textContent = '#' + String(lesson.id);
+          li.appendChild(title);
+          li.appendChild(id);
+          listEl.appendChild(li);
+        });
+      }
+    } catch (err) {
+      listEl.innerHTML = '';
+      const fail = document.createElement('li');
+      fail.className = 'placeholder';
+      fail.textContent = 'Could not load lessons. Please try again.';
+      listEl.appendChild(fail);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function handleNotify() {
+    const input = document.getElementById('emailInput');
+    const email = input.value.trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!re.test(email)) {
+      input.style.borderColor = '#d96b5c';
+      setTimeout(() => input.style.borderColor = '', 1000);
+      return;
+    }
+    showToast('Received, you\'ll hear from us first.');
+    input.value = '';
+  }
+  document.getElementById('notifyBtn').addEventListener('click', handleNotify);
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleNotify();
+  });
+</script>
+</body>
+</html>
